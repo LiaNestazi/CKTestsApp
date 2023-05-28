@@ -73,7 +73,7 @@ fun SetupNavGraph(
             SecurityPage(navController)
         }
         composable("ChangePasswordPage"){
-            ChangePasswordPage(navController)
+            ChangePasswordPage(navController, mainViewModel)
         }
 
 

@@ -1,6 +1,5 @@
 package com.example.testsapp.room
 
-import androidx.room.ProvidedTypeConverter
 import androidx.room.TypeConverter
 import com.example.testsapp.models.Question
 import com.google.gson.Gson
