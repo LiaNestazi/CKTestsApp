@@ -40,14 +40,14 @@ fun OptionsColumn(navController: NavHostController, list: List<NavigationDrawerI
                     "Аккаунт" -> {
                         navController.navigate("AccountPage", navOptions = null)
                     }
-                    "Уведомления" -> {
-                        navController.navigate("NotificationsPage", navOptions = null)
-                    }
                     "Безопасность" -> {
                         navController.navigate("SecurityPage", navOptions = null)
                     }
                     "Сменить пароль" -> {
                         navController.navigate("ChangePasswordPage", navOptions = null)
+                    }
+                    "Сохраненные тесты" -> {
+                        navController.navigate("SavedPage", navOptions = null)
                     }
                 }
             }

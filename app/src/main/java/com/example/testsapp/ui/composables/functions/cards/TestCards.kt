@@ -20,11 +20,15 @@ import com.example.testsapp.R
 import com.example.testsapp.ui.composables.functions.custom.RatingBar
 
 @Composable
-fun TestCards(navController: NavHostController, item: Test) {
+fun TestCards(navController: NavHostController, item: Test, local: Boolean = false) {
     Card(modifier = Modifier
         .fillMaxWidth()
         .padding(5.dp)
-        .clickable { navController.navigate("TestInfoPage/"+item.id) },
+        .clickable {
+            if (!local){
+                navController.navigate("TestInfoPage/"+item.id)
+            }
+                   },
         elevation = 5.dp,
         shape = RoundedCornerShape(15.dp)
     ){
@@ -66,7 +70,7 @@ fun TestCards(navController: NavHostController, item: Test) {
                     style = MaterialTheme.typography.body2)
 
                 FloatingActionButton(onClick = {
-                    navController.navigate("PlayTestPage/"+item.id)
+                    navController.navigate("PlayTestPage/${item.id}")
                 },
                     modifier = Modifier
                         .size(42.dp),

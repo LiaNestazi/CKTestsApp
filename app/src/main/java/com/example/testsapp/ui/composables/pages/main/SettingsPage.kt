@@ -139,5 +139,11 @@ private fun prepareAccountList(): List<NavigationDrawerItem>{
             label = "Безопасность"
         )
     )
+    itemsList.add(
+        NavigationDrawerItem(
+            icon = ImageVector.vectorResource(id = R.drawable.download),
+            label = "Сохраненные тесты"
+        )
+    )
     return itemsList
 }

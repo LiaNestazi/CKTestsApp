@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -22,25 +23,38 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.testsapp.R
 import com.example.testsapp.models.Test
+import com.example.testsapp.room.TestRoom
 import com.example.testsapp.singletone.SingletoneFirebase
 import com.example.testsapp.ui.composables.functions.custom.FAB
 import com.example.testsapp.ui.composables.functions.radiogroups.AnswersRadioGroup
 import com.example.testsapp.ui.composables.functions.radiogroups.QuestionsRadioGroup
 import com.example.testsapp.viewmodels.MainViewModel
+import com.example.testsapp.viewmodels.TestViewModel
 import kotlinx.coroutines.delay
 
 @Composable
-fun PlayTestPage(navController: NavHostController, mainViewModel: MainViewModel, item_id: String?){
+fun PlayTestPage(navController: NavHostController, mainViewModel: MainViewModel, testViewModel: TestViewModel, item_id: String?){
     val test = remember {
         mutableStateOf(Test())
     }
     val questions = remember {
         mutableStateOf(test.value.questions)
     }
-    if (item_id != null) {
-        SingletoneFirebase.instance.database.getReference("Tests").child(item_id).get().addOnSuccessListener {
-            test.value = it.getValue(Test::class.java) as Test
-            questions.value = test.value.questions
+    var isFoundLocal = false
+    val testFromLocal = testViewModel.readAllData.observeAsState(listOf()).value
+    if (item_id != null && item_id != "") {
+        for (item in testFromLocal){
+            if (item.id == item_id){
+                test.value = item
+                questions.value = item.questions
+                isFoundLocal = true
+            }
+        }
+        if (!isFoundLocal){
+            SingletoneFirebase.instance.database.getReference("Tests").child(item_id).get().addOnSuccessListener {
+                test.value = it.getValue(Test::class.java) as Test
+                questions.value = test.value.questions
+            }
         }
     }
     var isTimeRanOut: Boolean

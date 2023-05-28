@@ -18,8 +18,10 @@ import com.example.testsapp.ui.composables.pages.settings.AccountPage
 import com.example.testsapp.ui.composables.pages.userauth.RegisterPage
 import com.example.testsapp.ui.composables.pages.userauth.SignInPage
 import com.example.testsapp.ui.composables.pages.settings.ChangePasswordPage
+import com.example.testsapp.ui.composables.pages.settings.SavedPage
 import com.example.testsapp.ui.composables.pages.settings.SecurityPage
 import com.example.testsapp.viewmodels.MainViewModel
+import com.example.testsapp.viewmodels.TestViewModel
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -27,7 +29,8 @@ fun SetupNavGraph(
     navController: NavHostController,
     scope: CoroutineScope,
     drawerState: DrawerState,
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
+    testViewModel: TestViewModel
 ){
     NavHost(navController = navController,
         startDestination = "HomePage"
@@ -56,7 +59,7 @@ fun SetupNavGraph(
                 },
             )
         ){
-            TestInfoPage(navController = navController, mainViewModel, item_id = it.arguments?.getString("current"))
+            TestInfoPage(navController = navController, mainViewModel, testViewModel, item_id = it.arguments?.getString("current"))
         }
 
 
@@ -147,7 +150,7 @@ fun SetupNavGraph(
                 },
             )
         ){
-            PlayTestPage(navController = navController, mainViewModel, item_id = it.arguments?.getString("current"))
+            PlayTestPage(navController = navController, mainViewModel, testViewModel, item_id = it.arguments?.getString("current"))
         }
         composable(
             route = "ResultsPage/{current}",
@@ -157,7 +160,11 @@ fun SetupNavGraph(
                 },
             )
         ){
-            ResultsPage(navController = navController, mainViewModel = mainViewModel, item_id = it.arguments?.getString("current"))
+            ResultsPage(navController = navController, mainViewModel = mainViewModel, testViewModel, item_id = it.arguments?.getString("current"))
+        }
+
+        composable("SavedPage"){
+            SavedPage(navController = navController, testViewModel = testViewModel)
         }
     }
 }

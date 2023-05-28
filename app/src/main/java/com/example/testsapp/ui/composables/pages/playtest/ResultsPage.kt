@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -22,23 +23,36 @@ import androidx.navigation.NavHostController
 import com.example.testsapp.R
 import com.example.testsapp.models.Result
 import com.example.testsapp.models.Test
+import com.example.testsapp.room.TestRoom
 import com.example.testsapp.singletone.SingletoneFirebase
 import com.example.testsapp.ui.composables.functions.custom.RatingBar
 import com.example.testsapp.viewmodels.MainViewModel
+import com.example.testsapp.viewmodels.TestViewModel
 import kotlin.math.roundToInt
 
 @Composable
-fun ResultsPage(navController: NavHostController, mainViewModel: MainViewModel, item_id: String?) {
+fun ResultsPage(navController: NavHostController, mainViewModel: MainViewModel, testViewModel:TestViewModel, item_id: String?) {
     val test = remember {
         mutableStateOf(Test())
     }
     val questions = remember {
         mutableStateOf(test.value.questions)
     }
-    if (item_id != null) {
-        SingletoneFirebase.instance.database.getReference("Tests").child(item_id).get().addOnSuccessListener {
-            test.value = it.getValue(Test::class.java) as Test
-            questions.value = test.value.questions
+    var isFoundLocal = false
+    val testFromLocal = testViewModel.readAllData.observeAsState(listOf()).value
+    if (item_id != null && item_id != "") {
+        for (item in testFromLocal){
+            if (item.id == item_id){
+                test.value = item
+                questions.value = item.questions
+                isFoundLocal = true
+            }
+        }
+        if (!isFoundLocal){
+            SingletoneFirebase.instance.database.getReference("Tests").child(item_id).get().addOnSuccessListener {
+                test.value = it.getValue(Test::class.java) as Test
+                questions.value = test.value.questions
+            }
         }
     }
     val label = remember {
@@ -151,29 +165,33 @@ fun ResultsPage(navController: NavHostController, mainViewModel: MainViewModel, 
                                 var lastResultIndex = 0
                                 val userResults = mainViewModel.currentUser.value.results
 
-                                if (SingletoneFirebase.instance.auth.currentUser != null){
-                                    userResults.forEachIndexed { index, result ->
-                                        if (result.test_uid == item_id){
-                                            contains = true
-                                            lastResult = result.score
-                                            lastResultIndex = index
+                                if (!isFoundLocal){
+                                    if (SingletoneFirebase.instance.auth.currentUser != null){
+                                        userResults.forEachIndexed { index, result ->
+                                            if (result.test_uid == item_id){
+                                                contains = true
+                                                lastResult = result.score
+                                                lastResultIndex = index
+                                            }
                                         }
-                                    }
-                                    if (!contains){
-                                        mainViewModel.currentUser.value.results.add(Result(item_id,result))
-                                        SingletoneFirebase.instance.database.getReference("Users")
-                                            .child(mainViewModel.currentUser.value.id)
-                                            .setValue(mainViewModel.currentUser.value)
-                                    } else{
-                                        if (lastResult<result){
-                                            mainViewModel.currentUser.value.results[lastResultIndex] = Result(item_id,result)
+                                        if (!contains){
+                                            mainViewModel.currentUser.value.results.add(Result(item_id,result))
                                             SingletoneFirebase.instance.database.getReference("Users")
                                                 .child(mainViewModel.currentUser.value.id)
                                                 .setValue(mainViewModel.currentUser.value)
+                                        } else{
+                                            if (lastResult<result){
+                                                mainViewModel.currentUser.value.results[lastResultIndex] = Result(item_id,result)
+                                                SingletoneFirebase.instance.database.getReference("Users")
+                                                    .child(mainViewModel.currentUser.value.id)
+                                                    .setValue(mainViewModel.currentUser.value)
+                                            }
                                         }
                                     }
+                                    openRatingDialog.value = true
+                                } else{
+                                    navController.navigate("HomePage")
                                 }
-                                openRatingDialog.value = true
                             },
                             colors = ButtonDefaults.buttonColors(
                                 backgroundColor = colorResource(id = R.color.main_orange),
@@ -268,7 +286,8 @@ fun ResultsPage(navController: NavHostController, mainViewModel: MainViewModel, 
 }
 
 fun changeTestRating(itemId: String, currentTest: Test, newRating: Int) {
-    currentTest.rating = ((currentTest.rating + newRating) / 2.0).roundToInt()
-    SingletoneFirebase.instance.database.getReference("Tests").child(itemId).setValue(currentTest)
-
+    if (itemId != ""){
+        currentTest.rating = ((currentTest.rating + newRating) / 2.0).roundToInt()
+        SingletoneFirebase.instance.database.getReference("Tests").child(itemId).setValue(currentTest)
+    }
 }

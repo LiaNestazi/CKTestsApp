@@ -1,5 +1,7 @@
 package com.example.testsapp.ui.composables.pages.main
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
@@ -9,19 +11,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.testsapp.R
 import com.example.testsapp.models.Test
+import com.example.testsapp.room.TestRoom
 import com.example.testsapp.singletone.SingletoneFirebase
+import com.example.testsapp.ui.composables.functions.custom.FAB
 import com.example.testsapp.ui.composables.functions.custom.RatingBar
 import com.example.testsapp.ui.composables.functions.custom.Header
 import com.example.testsapp.viewmodels.MainViewModel
+import com.example.testsapp.viewmodels.TestViewModel
 
 @Composable
-fun TestInfoPage(navController: NavHostController, mainViewModel: MainViewModel, item_id: String?){
+fun TestInfoPage(navController: NavHostController, mainViewModel: MainViewModel, testViewModel: TestViewModel, item_id: String?){
+    val context = LocalContext.current
     Box(modifier = Modifier.fillMaxSize()) {
         val test = remember {
             mutableStateOf(Test())
@@ -59,7 +66,43 @@ fun TestInfoPage(navController: NavHostController, mainViewModel: MainViewModel,
                     }
                 }
                 Column(modifier = Modifier.align(Alignment.TopCenter)) {
-                    Header(navController = navController, title = "Информация о тесте")
+                    Row{
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight(0.13f)
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, end = 16.dp),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                Box(contentAlignment = Alignment.CenterStart,
+                                    modifier = Modifier.fillMaxWidth(0.14f)){
+                                    FAB({
+                                        navController.popBackStack()
+                                    }, iconResourceId = R.drawable.arrow_left)
+                                }
+                                Spacer(modifier = Modifier.size(4.dp))
+                                Box(contentAlignment = Alignment.Center,
+                                    modifier = Modifier
+                                        .fillMaxWidth(0.8f)){
+                                    Text(
+                                        "Информация о тесте",
+                                        fontSize = 20.sp,
+                                        style = MaterialTheme.typography.h1
+                                    )
+                                }
+                                Box(contentAlignment = Alignment.CenterEnd,
+                                    modifier = Modifier.fillMaxWidth()){
+                                    FAB(onClick = {
+                                        insertTestToLocalDB(context, test.value, testViewModel)
+                                    }, iconResourceId = R.drawable.download)
+                                }
+                            }
+                        }
+                    }
                     Column(modifier = Modifier
                         .padding(horizontal = 16.dp)) {
                         Text(text = test.value.name,
@@ -148,4 +191,9 @@ fun TestInfoPage(navController: NavHostController, mainViewModel: MainViewModel,
         }
 
     }
+}
+
+fun insertTestToLocalDB(context: Context, test: Test, testViewModel: TestViewModel) {
+    testViewModel.addTest(test)
+    Toast.makeText(context, "Тест успешно сохранен!", Toast.LENGTH_SHORT).show()
 }

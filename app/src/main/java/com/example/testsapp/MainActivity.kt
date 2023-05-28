@@ -19,9 +19,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.testsapp.models.Test
 import com.example.testsapp.ui.composables.pages.main.MainPage
 import com.example.testsapp.ui.theme.TestsAppTheme
 import com.example.testsapp.viewmodels.MainViewModel
+import com.example.testsapp.viewmodels.TestViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -47,7 +51,9 @@ class MainActivity : ComponentActivity() {
                                     fontSize = 16.sp,
                                     textAlign = TextAlign.Center,
                                     style = MaterialTheme.typography.h1,
-                                    modifier = Modifier.padding(vertical = 10.dp).fillMaxWidth()
+                                    modifier = Modifier
+                                        .padding(vertical = 10.dp)
+                                        .fillMaxWidth()
                                 )
                             },
                             text = {
@@ -56,7 +62,9 @@ class MainActivity : ComponentActivity() {
                                     fontSize = 16.sp,
                                     textAlign = TextAlign.Center,
                                     style = MaterialTheme.typography.body1,
-                                    modifier = Modifier.padding(vertical = 10.dp).fillMaxWidth()
+                                    modifier = Modifier
+                                        .padding(vertical = 10.dp)
+                                        .fillMaxWidth()
                                 )
                             },
                             buttons = {
